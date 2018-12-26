@@ -116,8 +116,8 @@ while True:
 		
 		# update the list of names
 		names.append(name)
-		#image_name = 'save_image//' + str(time.time()) + '_person.jpg'
-		#cv2.imwrite(image_name, frame)
+		image_name = 'save_image//' + str(time.time()) + '_person.jpg'
+		cv2.imwrite(image_name, frame)
 		flag = time.time()
 		#start = 1
 
