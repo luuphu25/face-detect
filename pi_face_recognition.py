@@ -10,6 +10,25 @@ import imutils
 import pickle
 import time
 import cv2
+import json
+import requests
+import os
+from multiprocessing import Process
+
+
+def create_info(object, addr):
+	timestamp = time.time()
+	normal_time = time.ctime()
+	#:dic = { 'Time': normal_time, 'Object':object}
+	dic = {'object_name': object, 'time': timestamp }
+	push_json = json.dumps(dic)
+	js = json.loads(push_json)
+	headers = "Content-Type: application/json"
+	try:
+		r = requests.post(addr, json=js)
+	except:
+		return -1
+
 
 # construct the argument parser and parse the arguments
 ap = argparse.ArgumentParser()
@@ -17,8 +36,16 @@ ap.add_argument("-c", "--cascade", required=True,
 	help = "path to where the face cascade resides")
 ap.add_argument("-e", "--encodings", required=True,
 	help="path to serialized db of facial encodings")
+ap.add_argument("--port")
+ap.add_argument("--host")
 args = vars(ap.parse_args())
-
+host = '127.0.0.1'
+port = '9000'
+host = args["host"]
+port = args["port"]
+addr = 'http://' + str(host) + ':' +  str(port)
+if not os.path.exists('save_image'):
+    os.mkdir('save_image')
 # load the known faces and embeddings along with OpenCV's Haar
 # cascade for face detection
 print("[INFO] loading encodings + face detector...")
@@ -89,6 +116,14 @@ while True:
 		
 		# update the list of names
 		names.append(name)
+		#image_name = 'save_image//' + str(time.time()) + '_person.jpg'
+		#cv2.imwrite(image_name, frame)
+		flag = time.time()
+		#start = 1
+
+		pol = Process(target=create_info, args=(str(name), addr))
+		pol.start()
+		pol.join()
 
 	# loop over the recognized faces
 	for ((top, right, bottom, left), name) in zip(boxes, names):
